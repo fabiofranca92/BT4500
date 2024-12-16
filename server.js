@@ -1,21 +1,36 @@
+const sql = require('mssql');
 const express = require('express');
-const mysql = require('mysql2');
 const app = express();
+const cors = require('cors')
 
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'beach_tennis'
-});
+// Configure CORS
+app.use(cors());
 
-app.get('/players', (req, res) => {
-    db.query('SELECT * FROM players', (err, results) => {
-        if (err) throw err;
-        res.json(results);
+const config = {
+    user: 'FF',
+    password: 'Char1bury123',
+    server: 'ec2-13-60-252-8.eu-north-1.compute.amazonaws.com',
+    database: 'BT4500',
+    options: {
+        encrypt: true, // Use true if you're on Azure
+        trustServerCertificate: true, // Set to true for local dev/test
+    },
+};
+
+sql.connect(config).then(pool => {
+    app.get('/players', async (req, res) => {
+        try {
+            const result = await pool.request().query('SELECT * FROM players');
+            res.json(result.recordset);
+        } catch (err) {
+            console.error('SQL query error:', err);
+            res.status(500).send('Error fetching data from database');
+        }
     });
 });
+
 
 app.listen(3000, () => {
     console.log('Server running on http://localhost:3000');
 });
+

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Rankings</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0047AB;
+        }
+        .division-section {
+            margin-bottom: 2rem;
+        }
+        .division-section h2 {
+            color: #FF9900;
+            border-bottom: 2px solid #FFCC00;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        ol {
+            padding-left: 1.5rem;
+        }
+        li {
+            margin: 0.5rem 0;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .back-link a {
+            text-decoration: none;
+            color: #0047AB;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .show-all {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .show-all button {
+            background-color: #0047AB;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .show-all button:hover {
+            background-color: #003580;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Full Rankings</h1>
+
+        <div class="show-all">
+            <button onclick="showAllDivisions()">Show All Divisions</button>
+        </div>
+
+        <div id="rankings">
+            <!-- Rankings will be dynamically inserted here -->
+        </div>
+
+        <div class="back-link">
+            <a href="home.html">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        async function fetchFullRankings() {
+            try {
+                const response = await fetch('http://localhost:3000/players');
+                const players = await response.json();
+
+                const divisions = {
+                    m1: 'Division M1',
+                    m2: 'Division M2',
+                    f1: 'Division F1',
+                    f2: 'Division F2',
+                    mx1: 'Division MX1',
+                    mx2: 'Division MX2'
+                };
+
+                const rankingsContainer = document.getElementById('rankings');
+
+                Object.keys(divisions).forEach(divisionKey => {
+                    const divisionPlayers = players
+                        .filter(player => player.division.toLowerCase() === divisionKey)
+                        .sort((a, b) => b.points - a.points)
+                        .slice(0, 3);
+
+                    if (divisionPlayers.length > 0) {
+                        const section = document.createElement('div');
+                        section.className = 'division-section';
+                        section.setAttribute('data-division', divisionKey);
+
+                        const title = document.createElement('h2');
+                        title.textContent = divisions[divisionKey];
+                        title.onclick = () => showDivision(divisionKey, divisions[divisionKey]);
+                        section.appendChild(title);
+
+                        const list = document.createElement('ol');
+                        divisionPlayers.forEach(player => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${player.name} - ${player.points} points`;
+                            list.appendChild(listItem);
+                        });
+
+                        section.appendChild(list);
+                        rankingsContainer.appendChild(section);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching full rankings:', error);
+            }
+        }
+
+        function showDivision(divisionKey, divisionName) {
+            const allSections = document.querySelectorAll('.division-section');
+            allSections.forEach(section => {
+                if (section.getAttribute('data-division') === divisionKey) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            const showAllButton = document.querySelector('.show-all');
+            showAllButton.style.display = 'block';
+        }
+
+        function showAllDivisions() {
+            const allSections = document.querySelectorAll('.division-section');
+            allSections.forEach(section => {
+                section.style.display = 'block';
+            });
+
+            const showAllButton = document.querySelector('.show-all');
+            showAllButton.style.display = 'block';
+        }
+
+        // Fetch full rankings when the page loads
+        fetchFullRankings();
+    </script>
+</body>
+</html>

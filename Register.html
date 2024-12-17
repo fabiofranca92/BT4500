@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register for Tournament</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #0047AB;
+            margin-bottom: 1.5rem;
+        }
+        .registration-form {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .tournament-details {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .registration-form h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #0047AB;
+        }
+        .registration-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .registration-form input,
+        .registration-form select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .registration-form button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0047AB;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .registration-form button:hover {
+            background: #003580;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tournament-details" id="tournamentDetails">
+        Loading tournament details...
+    </div>
+
+    <div class="registration-form">
+        <h2>Register for Tournament</h2>
+        <form id="registrationForm">
+            <input type="hidden" id="tournamentId" name="tournamentId">
+            <label for="name">First Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="sex">Sex:</label>
+            <select id="sex" name="sex" required>
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+
+            <label for="category">Tournament Category:</label>
+            <select id="category" name="category" required>
+                <option value="">Select</option>
+                <option value="M1">M1</option>
+                <option value="M2">M2</option>
+                <option value="MX">MX</option>
+                <option value="F1">F1</option>
+                <option value="F2">F2</option>
+                <option value="FX">FX</option>
+            </select>
+
+            <button type="submit">Submit Registration</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tournamentId = urlParams.get('tournamentId');
+            document.getElementById('tournamentId').value = tournamentId;
+
+            // Fetch and display tournament details
+            const tournamentDetailsDiv = document.getElementById('tournamentDetails');
+            try {
+                const response = await fetch(`http://localhost:3000/tournaments/${tournamentId}`);
+                if (response.ok) {
+                    const tournament = await response.json();
+                    tournamentDetailsDiv.innerHTML = `
+                        <h3>${tournament.name}</h3>
+                        <p>Date: ${new Date(tournament.date).toLocaleDateString()}</p>
+                    `;
+                } else {
+                    tournamentDetailsDiv.textContent = "Unable to load tournament details.";
+                }
+            } catch (error) {
+                console.error('Error fetching tournament details:', error);
+                tournamentDetailsDiv.textContent = "Error loading tournament details.";
+            }
+
+            // Update categories based on selected sex
+            const sexField = document.getElementById('sex');
+            const categoryField = document.getElementById('category');
+
+            const maleCategories = ['M1', 'M2', 'MX'];
+            const femaleCategories = ['F1', 'F2', 'FX'];
+
+            sexField.addEventListener('change', () => {
+                const selectedSex = sexField.value;
+                categoryField.innerHTML = '<option value="">Select</option>'; // Clear categories
+
+                let categories = [];
+                if (selectedSex === 'M') {
+                    categories = maleCategories;
+                } else if (selectedSex === 'F') {
+                    categories = femaleCategories;
+                }
+
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryField.appendChild(option);
+                });
+            });
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const formObject = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('http://localhost:3000/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formObject),
+                });
+                if (response.status === 409) {
+                    alert('You are already registered for this tournament and category.');
+                } else if (response.ok) {
+                    alert('Registration successful!');
+                } else {
+                    alert('Failed to register. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting registration:', error);
+                alert('Error submitting registration. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

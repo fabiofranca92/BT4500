@@ -83,78 +83,48 @@
         <div>Sunshine Beach Tennis Open 2024</div>
     </div>
 
-    <!-- Section 2: Players Ranking -->
-    <div class="section players-ranking">
-        <div>
-            <h2>Division M1</h2>
-            <ol id="division-m1"></ol>
-        </div>
-        <div>
-            <h2>Division M2</h2>
-            <ol id="division-m2"></ol>
-        </div>
-        <div>
-            <h2>Division F1</h2>
-            <ol id="division-f1"></ol>
-        </div>
-        <div>
-            <h2>Division F2</h2>
-            <ol id="division-f2"></ol>
-        </div>
-        <div>
-            <h2>Division MX1</h2>
-            <ol id="division-mx1"></ol>
-        </div>
-        <div>
-            <h2>Division MX2</h2>
-            <ol id="division-mx2"></ol>
-        </div>
+    <div class="section tournaments-list">
+        <h2>Upcoming Tournaments</h2>
+        <ul id="tournaments"></ul>
     </div>
+
 
     <!-- Section 3: Logo -->
     <div class="section logo">
         <img src="logo.png" alt="Tournament Logo">
     </div>
 
-    <!-- Regulations Link -->
-    <div class="regulations-link">
-        <a href="regulations.pdf" target="_blank">View Tournament Regulations</a>
+
+    
+
+    <!-- Full Rankings Page Link -->
+    <div class="ranking-page-link">
+        <a href="ranking.html" target="_blank">View Full Rankings</a>
     </div>
-
-    <script>
-        async function fetchPlayers() {
-            try {
-                const response = await fetch('http://localhost:3000/players');
-                const players = await response.json();
-
-                const divisions = {
-                    m1: document.getElementById('division-m1'),
-                    m2: document.getElementById('division-m2'),
-                    f1: document.getElementById('division-f1'),
-                    f2: document.getElementById('division-f2'),
-                    mx1: document.getElementById('division-mx1'),
-                    mx2: document.getElementById('division-mx2')
-                };
-
-                Object.keys(divisions).forEach(divisionKey => {
-                    const divisionList = divisions[divisionKey];
-                    const divisionPlayers = players
-                        .filter(player => player.division.toLowerCase() === divisionKey)
-                        .sort((a, b) => b.points - a.points);
-
-                    divisionPlayers.forEach(player => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${player.name} - ${player.points} points`;
-                        divisionList.appendChild(listItem);
-                    });
-                });
-            } catch (error) {
-                console.error('Error fetching players:', error);
-            }
-        }
-
-        // Fetch players when the page loads
-        fetchPlayers();
-    </script>
 </body>
+
+<script>
+    async function fetchTournaments() {
+        try {
+            const response = await fetch('http://localhost:3000/tournaments');
+            const tournaments = await response.json();
+
+            const tournamentList = document.getElementById('tournaments');
+            tournaments.forEach(tournament => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <a href="register.html?tournamentId=${tournament.id}">
+                        ${tournament.name} - ${new Date(tournament.date).toLocaleDateString()}
+                    </a>
+                `;
+                tournamentList.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error('Error fetching tournaments:', error);
+        }
+    }
+
+    // Fetch tournaments when the page loads
+    fetchTournaments();
+</script>
 </html>

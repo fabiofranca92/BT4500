@@ -1,0 +1,32 @@
+{
+  "name": "BT4500",
+  "version": "1.0.0",
+  "description": "",
+  "main": "config.js",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-openid-connect": "^2.17.1",
+    "mssql": "^11.0.1",
+    "mysql2": "^3.11.5",
+    "nodemon": "^3.1.9",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabiofranca92/BT4500.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fabiofranca92/BT4500/issues"
+  },
+  "homepage": "https://github.com/fabiofranca92/BT4500#readme"
+}

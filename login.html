@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #0047AB;
+            margin-bottom: 1.5rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0047AB;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        button:hover {
+            background: #003580;
+        }
+        .message {
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <button id="loginButton">Login</button>
+        <div class="message" id="loginMessage"></div>
+    </div>
+
+    <script>
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            const loginMessage = document.getElementById('loginMessage');
+            loginMessage.textContent = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'GET',
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    loginMessage.textContent = `Login successful: ${data.message}`;
+                } else {
+                    loginMessage.textContent = `Login failed: ${response.statusText}`;
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                loginMessage.textContent = 'Unable to connect to the server.';
+            }
+        });
+    </script>
+</body>
+</html>

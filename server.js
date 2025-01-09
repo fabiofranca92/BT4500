@@ -2,12 +2,44 @@ const sql = require('mssql');
 const express = require('express');
 const app = express();
 const cors = require('cors')
+const bcrypt = require('bcrypt'); 
+const { join } = require("path");
+const { auth } = require('express-openid-connect');
+const { requiresAuth } = require('express-openid-connect');
+
 
 // Configure CORS
-app.use(cors());
 app.use(express.json()); // This line parses incoming JSON requests
 
+app.use(
+    cors({
+      origin: "http://localhost:3000/login", // restrict calls to those this address
+      methods: "GET" // only allow GET requests
+    })
+  );
+
 const config = {
+    authRequired: false,
+    auth0Logout: true,
+    secret: 'a long, randomly-generated string stored in env',
+    baseURL: 'http://localhost:3000',
+    clientID: 'QLYjvRLq0tHhSf7jHFujPSsGAfn1WOCJ',
+    issuerBaseURL: 'https://dev-a5uwo1ni4zf2cfwq.us.auth0.com'
+};
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+// req.isAuthenticated is provided from the auth router
+app.get('/', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ?  "Logged In" : 'Logged out');
+});
+
+app.get('/profile', requiresAuth(), (req, res) => {
+    res.send(JSON.stringify(req.oidc.user));
+  });
+
+const configDB = {
     user: 'FF',
     password: 'Char1bury123',
     server: 'ec2-13-60-252-8.eu-north-1.compute.amazonaws.com',
@@ -15,10 +47,11 @@ const config = {
     options: {
         encrypt: true, // Use true if you're on Azure
         trustServerCertificate: true, // Set to true for local dev/test
-    },
+    }
 };
 
-sql.connect(config).then(pool => {
+sql.connect(configDB).then(pool => {
+
     app.get('/players', async (req, res) => {
         try {
             const result = await pool.request().query('SELECT * FROM players');
@@ -107,7 +140,12 @@ sql.connect(config).then(pool => {
             res.status(500).send('Error fetching tournament details');
         }
     });
+
 });
+
+
+
+
 
 
 app.listen(3000, () => {

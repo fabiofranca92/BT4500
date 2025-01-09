@@ -103,10 +103,12 @@
     </div>
 </body>
 
+ <!-- Load Configuration -->
+<script src="config.js"></script>
 <script>
     async function fetchTournaments() {
         try {
-            const response = await fetch('http://localhost:3000/tournaments');
+            const response = await fetch(`${CONFIG.SERVER_URL}/tournaments`);
             const tournaments = await response.json();
 
             const tournamentList = document.getElementById('tournaments');

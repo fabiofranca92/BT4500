@@ -11,11 +11,9 @@ const { requiresAuth } = require('express-openid-connect');
 // Configure CORS
 app.use(express.json()); // This line parses incoming JSON requests
 
+
 app.use(
-    cors({
-      origin: "http://localhost:3000/login", // restrict calls to those this address
-      methods: "GET" // only allow GET requests
-    })
+    cors()
   );
 
 const config = {
@@ -24,7 +22,7 @@ const config = {
     secret: 'a long, randomly-generated string stored in env',
     baseURL: 'http://localhost:3000',
     clientID: 'QLYjvRLq0tHhSf7jHFujPSsGAfn1WOCJ',
-    issuerBaseURL: 'https://dev-a5uwo1ni4zf2cfwq.us.auth0.com'
+    issuerBaseURL: 'https://dev-a5uwo1ni4zf2cfwq.us.auth0.com',
 };
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
@@ -32,12 +30,18 @@ app.use(auth(config));
 
 // req.isAuthenticated is provided from the auth router
 app.get('/', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ?  "Logged In" : 'Logged out');
+  res.send(req.oidc.isAuthenticated() ? 'Logged In' : 'Logged out');
 });
 
 app.get('/profile', requiresAuth(), (req, res) => {
     res.send(JSON.stringify(req.oidc.user));
   });
+
+  // Endpoint to serve the configuration file
+app.get("/auth_config.json", (req, res) => {
+    res.sendFile(join(__dirname, "auth_config.json"));
+});
+
 
 const configDB = {
     user: 'FF',
@@ -52,7 +56,7 @@ const configDB = {
 
 sql.connect(configDB).then(pool => {
 
-    app.get('/players', async (req, res) => {
+    app.get('/players',  async (req, res) => {
         try {
             const result = await pool.request().query('SELECT * FROM players');
             res.json(result.recordset);
